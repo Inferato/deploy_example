@@ -20,7 +20,7 @@ jobs:
                https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
                -d "executable=/bin/bash")
              console_id=$(echo $response | jq -r .id)
-             echo "::set-output name=console_id::$console_id"
+             echo "console_id=$console_id" >> $GITHUB_OUTPUT
 
          - name: Run shell script on PythonAnywhere
            run: |

@@ -1,0 +1,9 @@
+<h1>Task List</h1>
+<ul>
+    {% for task in tasks %}
+        <li>
+            <strong>{{ task.title }}</strong>: 
+            {{ task.description }} {% if task.is_completed %} (completed) {% else %} (not completed) {% endif %}
+        </li>
+    {% endfor %}
+</ul>

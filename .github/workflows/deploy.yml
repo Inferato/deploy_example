@@ -60,4 +60,4 @@ jobs:
           curl -X POST \
             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/send_input/ \
-            -d "input=./PA_UPDATE.sh\n"
+            -d "input=./PA_UPDATE.sh && exit\n"

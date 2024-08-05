@@ -17,5 +17,5 @@ jobs:
               run: |
                 curl -X POST -H "Authorization: Token $PA_API_TOKEN" \
                 -d "" \
-                "https:/www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles" \
+                "https:/www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles/" \
                 -d "command=/home/$PA_USERNAME/PA_UPDATE.sh"

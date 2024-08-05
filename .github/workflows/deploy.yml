@@ -6,25 +6,46 @@ on:
             - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-         - name: Checkout repository
-           uses: actions/checkout@v3
+  deploy:
+    runs-on: ubuntu-latest
 
-         - name: Start PythonAnywhere console
-           id: start_console
-           run: |
-             response=$(curl -X POST \
-               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-               https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
-               -d "executable=/bin/bash")
-             console_id=$(echo $response | jq -r .id)
-             echo "console_id=$console_id" >> $GITHUB_OUTPUT
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-         - name: Run shell script on PythonAnywhere
-           run: |
-             curl -X POST \
-               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-               https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/${{ steps.start_console.outputs.console_id }}/send_input/ \
-               -d "input=./PA_UPDATE.sh\n"
+      - name: Start PythonAnywhere console
+        id: start_console
+        run: |
+          response=$(curl -X POST \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
+            -d "executable=/bin/bash")
+          console_id=$(echo $response | jq -r .id)
+          echo "console_id=$console_id" >> $GITHUB_OUTPUT
+
+      - name: Wait for console to start
+        id: wait_console
+        run: |
+          console_id=${{ steps.start_console.outputs.console_id }}
+          for i in {1..10}; do
+            response=$(curl -X GET \
+              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+              https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/)
+            status=$(echo $response | jq -r .status)
+            if [[ "$status" == "running" ]]; then
+              echo "Console is running"
+              exit 0
+            fi
+            echo "Waiting for console to start..."
+            sleep 5
+          done
+          echo "Console did not start in time"
+          exit 1
+
+      - name: Run shell script on PythonAnywhere
+        run: |
+          console_id=${{ steps.start_console.outputs.console_id }}
+          curl -X POST \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/send_input/ \
+            -d "input=./PA_UPDATE.sh\n"

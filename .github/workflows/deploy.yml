@@ -33,7 +33,7 @@ jobs:
             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
             -d "executable=/bin/bash")
           console_id=$(echo $response | jq -r .id)
-          echo "console_id=$console_id" >> $GITHUB_OUTPUT
+          echo "$console_id"
 
       - name: Wait for console to start
         id: wait_console
@@ -60,4 +60,4 @@ jobs:
           curl -X POST \
             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/send_input/ \
-            -d "executable=./PA_UPDATE.sh\n"
+            -d "./PA_UPDATE.sh\n"

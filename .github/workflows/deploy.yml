@@ -31,12 +31,11 @@ jobs:
             response=$(curl -X GET \
               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
               https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/)
-            status=$(echo $response | jq -r .status)
-            if [[ "$status" == "running" ]]; then
-              echo "Console is running"
+            if [[ "$response" == *"id"* ]]; then
+              echo "Console is ready"
               exit 0
             fi
-            echo "$response"
+            echo "Waiting for console to start..."
             sleep 5
           done
           echo "Console did not start in time"

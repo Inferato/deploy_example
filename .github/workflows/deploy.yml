@@ -1,62 +1,62 @@
-name: Deploy Django project to PythonAnywhere
+# name: Deploy Django project to PythonAnywhere
 
-on:
-    push:
-        branches:
-            - main
+# on:
+#     push:
+#         branches:
+#             - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-      - name: Delete all active consoles
-        run: |
-          consoles=$(curl -X GET \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ | jq -r '.[].id')
-          for console_id in $consoles; do
-            curl -X DELETE \
-              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-              https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/
-          done
-          echo "All active consoles deleted"
+#       - name: Delete all active consoles
+#         run: |
+#           consoles=$(curl -X GET \
+#             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ | jq -r '.[].id')
+#           for console_id in $consoles; do
+#             curl -X DELETE \
+#               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#               https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/
+#           done
+#           echo "All active consoles deleted"
 
-      - name: Start PythonAnywhere console
-        id: start_console
-        run: |
-          response=$(curl -X POST \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
-            -d "executable=/bin/bash")
-          console_id=$(echo $response | jq -r .id)
-          echo "$console_id"
+#       - name: Start PythonAnywhere console
+#         id: start_console
+#         run: |
+#           response=$(curl -X POST \
+#             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/ \
+#             -d "executable=/bin/bash")
+#           console_id=$(echo $response | jq -r .id)
+#           echo "$console_id"
 
-      - name: Wait for console to start
-        id: wait_console
-        run: |
-            console_id=${{ steps.start_console.outputs.console_id }}
-            curl -X GET \
-              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-              https://www.pythonanywhere.com/user/${{ secrets.PA_USENAME }}/consoles/$console_id/
-              echo "Console is ready"
+#       - name: Wait for console to start
+#         id: wait_console
+#         run: |
+#             console_id=${{ steps.start_console.outputs.console_id }}
+#             curl -X GET \
+#               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#               https://www.pythonanywhere.com/user/${{ secrets.PA_USENAME }}/consoles/$console_id/
+#               echo "Console is ready"
 
-      - name: Run shell script on PythonAnywhere
-        run: |
-            console_id=${{ steps.start_console.outputs.console_id }}
-            curl -X POST \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/send_input/ \
-            --data-urlencode input="./PA_UPDATE.sh \n"
+#       - name: Run shell script on PythonAnywhere
+#         run: |
+#             console_id=${{ steps.start_console.outputs.console_id }}
+#             curl -X POST \
+#             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#             https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/send_input/ \
+#             --data-urlencode input="./PA_UPDATE.sh \n"
 
-            echo "$console_id"
+#             echo "$console_id"
   
-      - name: Get console output (optional)
-        run: |
-            console_id=${{ steps.start_console.outputs.console_id }}
-            curl -X GET \
-              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-              https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/
+#       - name: Get console output (optional)
+#         run: |
+#             console_id=${{ steps.start_console.outputs.console_id }}
+#             curl -X GET \
+#               -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+#               https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/$console_id/
